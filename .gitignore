@@ -1,0 +1,13 @@
+
+__pycache__/
+*.py[cod]
+
+
+venv/
+ENV/
+
+
+map_data.json
+
+.DS_Store
+Thumbs.db

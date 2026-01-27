@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>fGalaxy</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { 
+            margin: 0; 
+            background: radial-gradient(circle at center, #0a0a0a 0%, #050505 100%); 
+            color: #ffffff; 
+            font-family: 'Courier New', monospace; 
+            overflow: hidden; 
+        }
+
+        #overlay { 
+            position: absolute; top: 20px; left: 20px; z-index: 10; 
+            pointer-events: none; border-left: 2px solid #ffffff; padding-left: 15px; 
+        }
+
+        .node { transition: r 0.3s, fill 0.3s, filter 0.3s; z-index: 5; }
+        .node-hub, .node-dir { fill: #ffffff !important; filter: drop-shadow(0 0 8px #ffffff); }
+        .node:not(.node-dir):not(.node-hub) { fill: #aaaaaa; }
+        .node:hover { fill: #ffffff; cursor: pointer; filter: drop-shadow(0 0 10px #ffffff); }
+
+        .link { stroke: #444; stroke-opacity: 0.3; stroke-width: 1px; transition: stroke 0.3s, stroke-opacity 0.3s; }
+        .link.highlighted { stroke: #ffffff; stroke-opacity: 1; stroke-width: 2px; }
+
+        .label { 
+            fill: #ffffff; 
+            font-weight: bold;
+            pointer-events: none; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            paint-order: stroke;
+            stroke: #050505;
+            stroke-width: 2px;
+            transition: opacity 0.4s ease-in-out, font-size 0.4s;
+        }
+
+        .label-dir {
+            font-size: 14px;
+            opacity: 1 !important; 
+        }
+
+        .label-file {
+            font-size: 9px;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="overlay">
+        <h1>FGALAXY</h1>
+        <p>STATUS: NEURAL_LINK_ESTABLISHED</p>
+    </div>
+    <svg width="100vw" height="100vh"></svg>
+
+    <script>
+        const svg = d3.select("svg");
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const g = svg.append("g");
+
+        const zoom = d3.zoom().on("zoom", (e) => {
+            g.attr("transform", e.transform);
+            d3.selectAll(".label-file").style("opacity", e.transform.k < 0.7 ? 0 : 0.8);
+        });
+
+        svg.call(zoom);
+
+        d3.json("map_data.json").then(data => {
+            const simulation = d3.forceSimulation(data.nodes)
+                .force("link", d3.forceLink(data.links).id(d => d.id).distance(100))
+                .force("charge", d3.forceManyBody().strength(-400))
+                .force("center", d3.forceCenter(width / 2, height / 2));
+
+            const link = g.append("g")
+                .selectAll("line")
+                .data(data.links)
+                .join("line")
+                .attr("class", "link");
+
+            const node = g.append("g")
+                .selectAll("circle")
+                .data(data.nodes)
+                .join("circle")
+                .attr("r", d => d.type === 'folder' ? 10 : 5)
+                .attr("class", d => {
+                    let cls = "node";
+                    if (d.type === 'folder') {
+                        return (d.id === 0 || d.name.toLowerCase() === "fgalaxy") ? cls + " node-hub" : cls + " node-dir";
+                    }
+                    return cls;
+                })
+                .on("mouseover", (event, d) => {
+                    link.classed("highlighted", l => l.source.id === d.id || l.target.id === d.id);
+                })
+                .on("mouseout", () => {
+                    link.classed("highlighted", false);
+                })
+                .call(drag(simulation));
+
+            const label = g.append("g")
+                .selectAll("text")
+                .data(data.nodes)
+                .join("text")
+                .attr("class", d => d.type === 'folder' ? "label label-dir" : "label label-file")
+                .text(d => d.name)
+                .attr("text-anchor", "middle")
+                .attr("dy", d => d.type === 'folder' ? -15 : -12);
+
+            simulation.on("tick", () => {
+                link.attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+                node.attr("cx", d => d.x).attr("cy", d => d.y);
+                label.attr("x", d => d.x).attr("y", d => d.y);
+            });
+        });
+
+        function drag(sim) {
+            return d3.drag()
+                .on("start", e => { if (!e.active) sim.alphaTarget(0.3).restart(); e.subject.fx = e.x; e.subject.fy = e.y; })
+                .on("drag", e => { e.subject.fx = e.x; e.subject.fy = e.y; })
+                .on("end", e => { if (!e.active) sim.alphaTarget(0); e.subject.fx = null; e.subject.fy = null; });
+        }
+    </script>
+</body>
+</html>
