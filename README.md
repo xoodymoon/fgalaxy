@@ -14,10 +14,9 @@ fGalaxy is an interactive directory visualizer designed for developers who want 
 Execute the following command to download and install fGalaxy automatically:
 
 ```bash
-curl -sSL [https://raw.githubusercontent.com/xoodymoon/fgalaxy/main/install.sh](https://raw.githubusercontent.com/xoodymoon/fgalaxy/main/install.sh) | bash
+curl -sSL https://raw.githubusercontent.com/xoodymoon/fgalaxy/main/install.sh | bash
 ```
 **Note:** Requires `python`, `python-numpy`, and `git`.
-
 
 ## Usage
 
