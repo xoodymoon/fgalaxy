@@ -1,17 +1,6 @@
 #!/bin/bash
 
-PROJECT_DIR="$HOME/fgalaxy"
+PROJECT_DIR="$HOME/.fgalaxy"
 TARGET_DIR=$(pwd)
 
-python3 "$PROJECT_DIR/main.py" "$TARGET_DIR"
-
-cd "$PROJECT_DIR"
-python3 -m http.server 8000 > /dev/null 2>&1 &
-SERVER_PID=$!
-
-xdg-open "http://localhost:8000" > /dev/null 2>&1
-
-sleep 2
-
-kill $SERVER_PID
-echo "🌌 fgalaxy loaded. Resources freed."
+python3 "$PROJECT_DIR/main.py" "$TARGET_DIR" "$@"
