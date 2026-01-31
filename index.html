@@ -27,7 +27,7 @@
         .node-hub, .node-dir { fill: #fff !important; filter: drop-shadow(0 0 8px #fff); }
         .node:not(.node-dir):not(.node-hub) { fill: #aaa; }
         
-        .link { stroke: #444; stroke-opacity: 0.3; transition: opacity 0.3s; }
+        .link { stroke: #444; stroke-opacity: 0.3; transition: stroke 0.2s, stroke-opacity 0.2s; }
 
         .label { fill: #fff; font-weight: bold; pointer-events: none; paint-order: stroke; stroke: #000; stroke-width: 2px; }
         .label-file { opacity: 0; }
@@ -68,6 +68,14 @@
             const node = g.append("g").selectAll("circle").data(data.nodes).join("circle")
                 .attr("r", d => d.type === 'folder' ? 10 : 5)
                 .attr("class", d => d.type === 'folder' ? "node node-dir" : "node")
+                .on("mouseover", (event, d) => {
+                    link.style("stroke", l => (l.source.id === d.id || l.target.id === d.id) ? "#fff" : "#444")
+                        .style("stroke-opacity", l => (l.source.id === d.id || l.target.id === d.id) ? 1 : 0.1);
+                })
+                .on("mouseout", () => {
+                    link.style("stroke", "#444")
+                        .style("stroke-opacity", 0.3);
+                })
                 .call(d3.drag()
                     .on("start", e => { if (!e.active) simulation.alphaTarget(0.3).restart(); e.subject.fx = e.x; e.subject.fy = e.y; })
                     .on("drag", e => { e.subject.fx = e.x; e.subject.fy = e.y; })
