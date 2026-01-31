@@ -28,6 +28,13 @@ fgalaxy
 ```Bash
 fgalaxy -a # Deep scan (includes hidden files)
 ```
+
+##  Uninstall
+To completely remove fGalaxy and its global command:
+```bash
+curl -sSL https://raw.githubusercontent.com/xoodymoon/fgalaxy/main/uninstall.sh | bash
+```
+
 ## Technical Implementation
 
 The tool uses a recursive Python walker to map the directory structure into a weighted JSON tree. A bridge script then flattens this data for a D3.js force-simulation engine, which handles the spatial physics and browser-based rendering.
